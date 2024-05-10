@@ -1,0 +1,73 @@
+a. Creation of tables in Hive:
+
+$ hive
+hive> CREATE TABLE Customer_info (
+      Cust_ID INT,
+      Cust_Name STRING,
+      OrderID INT)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+hive> CREATE TABLE order_info (
+      OrderID INT,
+      ItemID INT,
+      Quantity INT)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+hive> CREATE TABLE item_info (
+      Item_ID INT,
+      Item_Name STRING,
+      ItemPrice DOUBLE)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+hive> LOAD DATA LOCAL INPATH '/path/to/customer_info.csv' INTO TABLE Customer_info;
+hive> LOAD DATA LOCAL INPATH '/path/to/order_info.csv' INTO TABLE order_info;
+hive> LOAD DATA LOCAL INPATH '/path/to/item_info.csv' INTO TABLE item_info;
+
+hive> SELECT * FROM Customer_info
+      JOIN order_info ON Customer_info.OrderID = order_info.OrderID
+      JOIN item_info ON order_info.ItemID = item_info.Item_ID;
+
+$ hive
+hive> CREATE INDEX idx_customer_info ON TABLE Customer_info (Cust_ID) AS 'COMPACT' WITH DEFERRED REBUILD;
+hive> ALTER INDEX idx_customer_info ON Customer_info REBUILD;
+
+hive> SELECT SUM(ItemPrice * Quantity) AS total_sales, AVG(ItemPrice * Quantity) AS avg_sales
+      FROM order_info JOIN item_info ON order_info.ItemID = item_info.Item_ID;
+
+hive> SELECT * FROM order_info
+      WHERE (ItemPrice * Quantity) = (SELECT MAX(ItemPrice * Quantity) FROM order_info);
+
+
+HBASE SHELL
+
+create 'CustomerInfoHBase', 'Customer'
+scan 'CustomerInfoHBase'
+
+HIVE
+
+hive> CREATE EXTERNAL TABLE CustomerInfoHBase (
+      Cust_ID INT,
+      Cust_Name STRING,
+      OrderID INT)
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES (
+      "hbase.columns.mapping" = ":key,Customer:cust_name,Customer:order_id")
+TBLPROPERTIES ("hbase.table.name" = "CustomerInfoHBase");
+
+///////////////////////////////////////////////////////////////////////
+LOAD DATA LOCAL INPATH '/home/cloudera/hivehbase/customer_info.txt' INTO TABLE Customer_info2;
+///////////////////////////////////////////////////////
+
+insert overwrite table CustomerInfoHBase select * from Customer_info;
+
+
+
+
+
+
