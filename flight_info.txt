@@ -1,0 +1,41 @@
+$ hbase shell
+hbase> create 'FlightInfo', 'Flight', 'Schedule', 'Delay'
+
+To alter a table in HBase:
+
+$ hbase shell
+hbase> alter 'TableName', 'NewColumnFamily'
+
+hbase> put 'FlightInfo', 'row1', 'Flight:airline', 'Airline1'
+hbase> put 'FlightInfo', 'row1', 'Flight:source', 'Source1'
+hbase> put 'FlightInfo', 'row1', 'Flight:destination', 'Destination1'
+hbase> put 'FlightInfo', 'row1', 'Schedule:departure_time', '10:00 AM'
+hbase> put 'FlightInfo', 'row1', 'Schedule:arrival_time', '12:00 PM'
+hbase> put 'FlightInfo', 'row1', 'Delay:delay_minutes', '30'
+
+create 'TableName', 'ColumnFamily1', 'ColumnFamily2'
+
+$ hbase shell
+hbase> disable 'TableName'
+hbase> drop 'TableName'
+
+$ hive
+hive> CREATE EXTERNAL TABLE FlightInfoHive (
+      flight_id STRING,
+      airline STRING,
+      source STRING,
+      destination STRING,
+      departure_time STRING,
+      arrival_time STRING,
+      delay_minutes INT)
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES (
+      "hbase.columns.mapping" =
+         ":key,Flight:airline,Flight:source,Flight:destination,Schedule:departure_time,Schedule:arrival_time,Delay:delay_minutes")
+TBLPROPERTIES ("hbase.table.name" = "FlightInfo");
+
+$ hive
+hive> SELECT SUM(delay_minutes) AS total_departure_delay FROM FlightInfoHive;
+
+$ hive
+hive> SELECT AVG(delay_minutes) AS avg_departure_delay FROM FlightInfoHive;

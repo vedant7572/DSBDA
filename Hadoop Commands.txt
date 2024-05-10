@@ -1,0 +1,27 @@
+file trasfer
+
+su root
+password-cloudera
+mount -t vboxsf shared shared
+
+
+
+hadoop command
+
+
+hadoop fs -put textFileName.txt nickname1
+hadoop jar jarFileName.jar package.class nickname1 nickname2
+
+hadoop fs -ls nickname2
+
+hadoop fs -cat nickname2/part-r-00000
+
+for wordcount 
+
+make project -> liabraries-> add extrernal jar -> filesystem ->usr->lib->hadoop->all jar add
+                             add extrernal jar -> client-> all files
+
+for remaining map reduce 
+build path->export jar->fileSystem->usr->lib->hadoop 2.0->lib->common cli
+
+
